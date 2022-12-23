@@ -6,5 +6,6 @@
 	"twitterMastodonHandleMap": {
 		"@Grziwatzki": "@amtavernentresen@rollenspiel.social"
 	},
-	"proxyURL": "http://localhost:3128"
+	"proxyURL": "http://localhost:3128",
+	"refreshMillis": 5000
 }

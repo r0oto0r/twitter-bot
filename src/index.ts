@@ -3,12 +3,15 @@ import { Mastodon } from './Mastodon';
 import fs from 'fs';
 import { Twitter } from './Twitter';
 import path from 'path';
+import config from 'config';
 
 export const tmpFolder = path.join(__dirname, '/../', '/tmp');
 
 (async () => {
     try {
 		Log.info(`Booting Twitter to Mastodon Bot`);
+
+		const refreshMillis = config.get("refreshMillis") as number;
 
 		Log.debug(`Setting tmpFolder to ${tmpFolder}`);
 
@@ -48,7 +51,7 @@ export const tmpFolder = path.join(__dirname, '/../', '/tmp');
 				}
 				running = false;
 			}
-		}, 5000);
+		}, refreshMillis);
     } catch (error: any) {
         Log.error(`Error occured: ${error}`);
     }

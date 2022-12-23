@@ -5,7 +5,6 @@ import axios from 'axios';
 import { tmpFolder } from '.';
 import config from 'config';
 import path from 'path';
-import { Mastodon } from './Mastodon';
 
 export const cacheFile = path.join(__dirname, '/../', 'cache.json');
 
