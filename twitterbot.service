@@ -1,0 +1,14 @@
+[Unit]
+Description=Twitter Bot
+After=network.target
+
+[Service]
+Type=simple
+User=twitterbot
+Environment=PORT=8080
+WorkingDirectory=/home/twitter-bot/
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

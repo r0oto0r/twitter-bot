@@ -1,0 +1,10 @@
+{
+	"mastodonBaseUrl": "https://det.social/",
+	"mastodonAccessToken": "",
+	"twitterAccessToken": "",
+	"twitterAccountId": "",
+	"twitterMastodonHandleMap": {
+		"@Grziwatzki": "@amtavernentresen@rollenspiel.social"
+	},
+	"proxyURL": "http://localhost:3128"
+}

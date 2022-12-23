@@ -1,0 +1,7 @@
+/node_modules
+/out
+.vscode/
+.env/
+/config/default.json
+/tmp
+cache.json
