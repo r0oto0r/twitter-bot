@@ -3,8 +3,6 @@ import { Mastodon } from './Mastodon';
 import fs from 'fs';
 import { Twitter } from './Twitter';
 import path from 'path';
-import axios from 'axios';
-import { HttpsProxyAgent } from 'https-proxy-agent';
 
 export const tmpFolder = path.join(__dirname, '/../', '/tmp');
 

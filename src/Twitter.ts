@@ -50,7 +50,7 @@ export class Twitter {
 				return;
 			}
 
-			lastTweetId = response.data[3].id;
+			lastTweetId = response.data[0].id;
 		} else {
 			Log.debug(`Using cached tweet id: ${lastTweetId}`);
 		}
