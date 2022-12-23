@@ -72,7 +72,8 @@ export class Twitter {
 				'variants'
 			],
 			'tweet.fields': [
-				'created_at'
+				'created_at',
+				'source'
 			],
 			since_id: lastTweetId
 		});
@@ -89,7 +90,7 @@ export class Twitter {
 			const tweets = response.data.sort((tweetA, tweetB) => { return new Date(tweetA.created_at).getTime() - new Date(tweetB.created_at).getTime() });
 			for(const tweet of tweets) {
 				try {
-					const { id: tweetId, text, attachments } = tweet;
+					const { id: tweetId, text, attachments, source } = tweet;
 					const downloadedFilePaths = new Array<string>();
 					let i = 0;
 
@@ -147,7 +148,7 @@ export class Twitter {
 
 					fetchedTweets.push({
 						id: tweetId,
-						text,
+						text: text + `\n\nQuelle: ${source}`,
 						downloadedFilePaths
 					});
 				} catch (error) {
