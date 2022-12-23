@@ -46,11 +46,13 @@ export class Mastodon {
 		try {
 			const urls = text.match(this.urlRegex);
 			if(urls?.length > 1) {
+				const { httpsAgent } = this;
+
 				for(let i = 0; i < urls.length; ++i) {
 					const url: string = urls[i];
 					let resolvedUrl;
 					try {
-						const response = await axios.get(url, { httpsAgent: this.httpsAgent });
+						const response = await axios.get(url, { httpsAgent });
 						resolvedUrl = response?.request?.res?.responseUrl;
 					} catch (error) {
 						Log.debug(error);

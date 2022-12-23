@@ -5,6 +5,7 @@ import axios from 'axios';
 import { tmpFolder } from '.';
 import config from 'config';
 import path from 'path';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 export const cacheFile = path.join(__dirname, '/../', 'cache.json');
 
@@ -12,6 +13,8 @@ export class Twitter {
 	private static twitterClient: Client;
 	private static twitterAccessToken: string;
 	private static twitterAccountId: string;
+	private static proxyURL: string;
+	private static httpsAgent: HttpsProxyAgent;
 
 	public static async init() {
 		Log.info(`Setting up twitter client`);
@@ -20,6 +23,8 @@ export class Twitter {
 
 		this.twitterAccessToken = config.get('twitterAccessToken');
 		this.twitterAccountId = config.get('twitterAccountId');
+		this.proxyURL = config.get("proxyURL");
+		this.httpsAgent = new HttpsProxyAgent(this.proxyURL);
 
 		this.twitterClient = new Client(this.twitterAccessToken);
 
@@ -88,6 +93,8 @@ export class Twitter {
 
 		if(response.data?.length > 0) {
 			const tweets = response.data.sort((tweetA, tweetB) => { return new Date(tweetA.created_at).getTime() - new Date(tweetB.created_at).getTime() });
+			const { httpsAgent } = this;
+
 			for(const tweet of tweets) {
 				try {
 					const { id: tweetId, text, attachments, source } = tweet;
@@ -125,11 +132,11 @@ export class Twitter {
 							downloadPromisses.push(new Promise<void>(async (resolve, reject) => {
 								try {
 									Log.debug(`Downloading attachment: ${mediaURL} ${media.type}`);
-
 									const filePath = tmpFolder + '/' + i + '_' + tweetId + ending;
 									const writeStream = fs.createWriteStream(filePath);
 									const response = await axios.get(mediaURL, {
-										responseType: 'stream'
+										responseType: 'stream',
+										httpsAgent
 									});
 									response.data.pipe(writeStream);
 									downloadedFilePaths.push(filePath);
