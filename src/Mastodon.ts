@@ -33,7 +33,7 @@ export class Mastodon {
 		text = this.replaceHandles(text);
 		text = await this.resolveLinks(text);
 		text = this.unEntity(text);
-		return text;
+		return text.substring(0, 500);
 	}
 
 	private static unEntity(text: string) {

@@ -148,7 +148,7 @@ export class Twitter {
 
 					fetchedTweets.push({
 						id: tweetId,
-						text: text + `\n\nQuelle: ${source}`,
+						text: text + `\n\nQuelle: https://twitter.com/TheRocketBeans/status/${tweetId}`,
 						downloadedFilePaths
 					});
 				} catch (error) {
