@@ -6,8 +6,11 @@ import { tmpFolder } from '.';
 import config from 'config';
 import path from 'path';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { promisify } from 'util';
+import stream from 'stream';
 
 export const cacheFile = path.join(__dirname, '/../', 'cache.json');
+const finishedDownload = promisify(stream.finished);
 
 export class Twitter {
 	private static twitterClient: Client;
@@ -139,6 +142,7 @@ export class Twitter {
 										httpsAgent
 									});
 									response.data.pipe(writeStream);
+									await finishedDownload(writeStream);
 									downloadedFilePaths.push(filePath);
 									resolve();
 								} catch (error) {
