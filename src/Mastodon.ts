@@ -23,7 +23,7 @@ export class Mastodon {
 		this.masto = await login({
 			url: config.get('mastodonBaseUrl'),
 			accessToken: config.get('mastodonAccessToken'),
-			timeout: 60 * 1000
+			timeout: 60 * 5 * 1000
 		});
 
 		Log.info(`Done setting up mastodon client`);
