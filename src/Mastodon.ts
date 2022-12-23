@@ -9,6 +9,7 @@ export class Mastodon {
 	private static masto: MastoClient;
 	private static twitterHandleRegex = /(@[a-zA-Z0-9_]+)/gm;
 	private static urlRegex = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/igm;
+	private static twitterMediaLinkRegex = /https:\/\/twitter\.com\/TheRocketBeans\/status\/\d*\/(video|photo)\/\d*/gm;
 	private static twitterMastodonHandleMap: { [twitterHandle: string]: string };
 	private static proxyURL: string;
 	private static httpsAgent: HttpsProxyAgent;
@@ -33,6 +34,7 @@ export class Mastodon {
 		text = this.replaceHandles(text);
 		text = await this.resolveLinks(text);
 		text = this.unEntity(text);
+		text = this.removeTwitterMediaLinks(text);
 		return text.substring(0, 500);
 	}
 
@@ -84,6 +86,16 @@ export class Mastodon {
 			} else {
 				result = result.replace(twitterHandle, twitterHandle + '@twitter');
 			}
+		}
+
+		return result;
+	}
+
+	private static removeTwitterMediaLinks(text: string) {
+		let result = text;
+		const twitterMediaLinks = text.matchAll(this.twitterMediaLinkRegex);
+		for(const [twitterMediaLink] of twitterMediaLinks) {
+				result = result.replace(twitterMediaLink, '');
 		}
 
 		return result;
