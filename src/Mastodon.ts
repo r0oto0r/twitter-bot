@@ -118,7 +118,7 @@ export class Mastodon {
 				},
 				{
 					name: 'Last Sync',
-					value: moment().format('DD.MM.YY - HH:mm:ss')
+					value: moment().local().format('DD.MM.YY - HH:mm:ss')
 				}
 			]
 		});
