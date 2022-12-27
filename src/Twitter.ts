@@ -8,7 +8,6 @@ import path from 'path';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { promisify } from 'util';
 import stream from 'stream';
-import { LinkShortener } from './LinkShortener';
 
 export const cacheFile = path.join(__dirname, '/../', 'cache.json');
 const finishedDownload = promisify(stream.finished);
