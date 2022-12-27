@@ -88,7 +88,7 @@ export class Mastodon {
 			if(this.twitterMastodonHandleMap && this.twitterMastodonHandleMap[twitterHandle]) {
 				result = result.replace(twitterHandle, this.twitterMastodonHandleMap[twitterHandle]);
 			} else {
-				result = result.replace(twitterHandle, twitterHandle + '@twitter');
+				result = result.replace(twitterHandle, twitterHandle + '@🐦');
 			}
 		}
 
