@@ -8,6 +8,7 @@ import path from 'path';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { promisify } from 'util';
 import stream from 'stream';
+import { LinkShortener } from './LinkShortener';
 
 export const cacheFile = path.join(__dirname, '/../', 'cache.json');
 const finishedDownload = promisify(stream.finished);
@@ -157,9 +158,12 @@ export class Twitter {
 						await Promise.all(downloadPromisses);
 					}
 
+					const sourceURL = `https://twitter.com/TheRocketBeans/status/${tweetId}`;
+					const shortenedUrl = await LinkShortener.createShortenedLink(sourceURL);
+
 					fetchedTweets.push({
 						id: tweetId,
-						text: text + `\n\nQuelle: https://twitter.com/TheRocketBeans/status/${tweetId}`,
+						text: text + `\n\nQuelle: ${shortenedUrl ? shortenedUrl : sourceURL}`,
 						downloadedFilePaths
 					});
 				} catch (error) {

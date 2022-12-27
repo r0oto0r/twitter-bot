@@ -4,6 +4,7 @@ import fs from 'fs';
 import { Twitter } from './Twitter';
 import path from 'path';
 import config from 'config';
+import { LinkShortener } from './LinkShortener';
 
 export const tmpFolder = path.join(__dirname, '/../', '/tmp');
 
@@ -38,6 +39,7 @@ const syncTweets = async () => {
 		if(fs.existsSync(tmpFolder)) {
 			fs.rmSync(tmpFolder, { recursive: true });
 		}
+		await Mastodon.updateProfile();
 		running = false;
 	}
 }
@@ -50,6 +52,7 @@ const syncTweets = async () => {
 
 		Log.debug(`Setting tmpFolder to ${tmpFolder}`);
 
+		await LinkShortener.init();
 		await Mastodon.init();
 		await Twitter.init();
 

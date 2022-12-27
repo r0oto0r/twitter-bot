@@ -1,4 +1,5 @@
 {
+	"version": "1.0.3",
 	"mastodonBaseUrl": "https://det.social/",
 	"mastodonAccessToken": "",
 	"twitterAccessToken": "",
@@ -7,5 +8,8 @@
 		"@Grziwatzki": "@amtavernentresen@rollenspiel.social"
 	},
 	"proxyURL": "http://localhost:3128",
-	"refreshMillis": 5000
+	"refreshMillis": 5000,
+	"tiniURLAPIKey": "",
+	"tinyURLAPI": "https://api.tinyurl.com",
+	"tinyURLDomain": "tiny.one"
 }

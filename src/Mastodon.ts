@@ -1,14 +1,16 @@
-import { Attachment, login, MastoClient } from 'masto';
+import { Attachment, login, MastoClient, UpdateCredentialsParams } from 'masto';
 import { Log } from './Log';
 import fs from 'fs';
 import config from 'config';
 import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import moment from 'moment';
 
 export class Mastodon {
 	private static masto: MastoClient;
 	private static twitterHandleRegex = /(@[a-zA-Z0-9_]+)/gm;
 	private static urlRegex = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/igm;
+	private static version: string;
 	private static twitterMediaLinkRegex = /https:\/\/twitter\.com\/TheRocketBeans\/status\/\d*\/(video|photo)\/\d*/gm;
 	private static twitterMastodonHandleMap: { [twitterHandle: string]: string };
 	private static proxyURL: string;
@@ -17,8 +19,10 @@ export class Mastodon {
 	public static async init() {
 		Log.info(`Setting up mastodon client`);
 
-		this.twitterMastodonHandleMap = config.get("twitterMastodonHandleMap");
-		this.proxyURL = config.get("proxyURL");
+		this.twitterMastodonHandleMap = config.get('twitterMastodonHandleMap');
+		this.proxyURL = config.get('proxyURL');
+		this.version = config.get('version');
+
 		this.httpsAgent = new HttpsProxyAgent(this.proxyURL);
 
 		this.masto = await login({
@@ -39,7 +43,7 @@ export class Mastodon {
 	}
 
 	private static unEntity(text: string) {
-		return text.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+		return text.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 	}
 
 	private static async resolveLinks(text: string) {
@@ -99,6 +103,25 @@ export class Mastodon {
 		}
 
 		return result;
+	}
+
+	public static async updateProfile() {
+		return this.masto.accounts.updateCredentials({
+			fieldsAttributes: [
+				{
+					name: 'Kontakt',
+					value: '@hoschi@mastodon.social'
+				},
+				{
+					name: 'Version',
+					value: this.version
+				},
+				{
+					name: 'Last Sync',
+					value: moment().format('DD.MM.YY - HH:mm:ss')
+				}
+			]
+		});
 	}
 
 	public static async createStatus(id: string, text: string, downloadedFilePaths: Array<string>) {
