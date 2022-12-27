@@ -4,7 +4,7 @@ import fs from 'fs';
 import config from 'config';
 import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 export class Mastodon {
 	private static masto: MastoClient;
@@ -118,7 +118,7 @@ export class Mastodon {
 				},
 				{
 					name: 'Last Sync',
-					value: moment().utc().local().format('DD.MM.YY - HH:mm:ss')
+					value: moment().tz("Europe/Berlin").format('DD.MM.YY - HH:mm:ss')
 				}
 			]
 		});
