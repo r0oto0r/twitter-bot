@@ -5,6 +5,7 @@ import config from 'config';
 import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import moment from 'moment-timezone';
+import { LinkShortener } from './LinkShortener';
 
 export class Mastodon {
 	private static masto: MastoClient;
@@ -34,11 +35,12 @@ export class Mastodon {
 		Log.info(`Done setting up mastodon client`);
 	}
 
-	public static async groomText(text: string) {
+	public static async groomText(text: string, tweetId: string) {
 		text = this.replaceHandles(text);
 		text = await this.resolveLinks(text);
 		text = this.unEntity(text);
 		text = this.removeTwitterMediaLinks(text);
+		text = await this.addSourceLink(tweetId, text);
 		return text.substring(0, 500);
 	}
 
@@ -88,11 +90,19 @@ export class Mastodon {
 			if(this.twitterMastodonHandleMap && this.twitterMastodonHandleMap[twitterHandle]) {
 				result = result.replace(twitterHandle, this.twitterMastodonHandleMap[twitterHandle]);
 			} else {
-				result = result.replace(twitterHandle, twitterHandle + '@🐦');
+				result = result.replace(twitterHandle, twitterHandle + '@twtr');
 			}
 		}
 
 		return result;
+	}
+
+	private static async addSourceLink(tweetId: string, text : string) {
+		const sourceURL = `https://twitter.com/TheRocketBeans/status/${tweetId}`;
+
+		const shortenedURL = await LinkShortener.createShortenedLink(sourceURL);
+
+		return text + `\n\nQuelle: ${shortenedURL ? shortenedURL : sourceURL}`;
 	}
 
 	private static removeTwitterMediaLinks(text: string) {
@@ -124,7 +134,7 @@ export class Mastodon {
 		});
 	}
 
-	public static async createStatus(id: string, text: string, downloadedFilePaths: Array<string>) {
+	public static async createStatus(tweetId: string, text: string, downloadedFilePaths: Array<string>) {
 		const uploadedMedia = new Array<Attachment>();
 		if(downloadedFilePaths?.length > 0) {
 			const uploadPromisses = new Array<Promise<void>>();
@@ -146,9 +156,9 @@ export class Mastodon {
 			}
 		}
 
-		const groomedText = await this.groomText(text);
+		const groomedText = await this.groomText(text, tweetId);
 
-		Log.info(`Posting toot for tweet id: ${id}`);
+		Log.info(`Posting toot for tweet id: ${tweetId}`);
 		Log.info(`groomed text: ${groomedText}`);
 		Log.info(`attachments: ${downloadedFilePaths?.length} ${downloadedFilePaths} ${uploadedMedia.map(media => media.id)}`);
 

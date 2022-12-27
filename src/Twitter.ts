@@ -158,12 +158,9 @@ export class Twitter {
 						await Promise.all(downloadPromisses);
 					}
 
-					const sourceURL = `https://twitter.com/TheRocketBeans/status/${tweetId}`;
-					const shortenedURL = await LinkShortener.createShortenedLink(sourceURL);
-
 					fetchedTweets.push({
 						id: tweetId,
-						text: text + `\n\nQuelle: ${shortenedURL ? shortenedURL : sourceURL}`,
+						text,
 						downloadedFilePaths
 					});
 				} catch (error) {
