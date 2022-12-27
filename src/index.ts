@@ -13,7 +13,7 @@ const syncTweets = async () => {
 	if(running) return;
 	running = true;
 
-	Log.info(`Looking for new tweets`);
+	Log.debug(`Looking for new tweets`);
 
 	try {
 		if(!fs.existsSync(tmpFolder)) {
