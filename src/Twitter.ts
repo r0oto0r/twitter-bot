@@ -88,7 +88,7 @@ export class Twitter {
 		});
 
 		if(response.meta.result_count < 1) {
-			Log.info('No new tweets found');
+			Log.debug('No new tweets found');
 		} else {
 			Log.info(`Found ${response.meta.result_count} tweets`);
 		}
@@ -159,11 +159,11 @@ export class Twitter {
 					}
 
 					const sourceURL = `https://twitter.com/TheRocketBeans/status/${tweetId}`;
-					const shortenedUrl = await LinkShortener.createShortenedLink(sourceURL);
+					const shortenedURL = await LinkShortener.createShortenedLink(sourceURL);
 
 					fetchedTweets.push({
 						id: tweetId,
-						text: text + `\n\nQuelle: ${shortenedUrl ? shortenedUrl : sourceURL}`,
+						text: text + `\n\nQuelle: ${shortenedURL ? shortenedURL : sourceURL}`,
 						downloadedFilePaths
 					});
 				} catch (error) {

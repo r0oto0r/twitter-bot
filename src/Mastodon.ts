@@ -1,4 +1,4 @@
-import { Attachment, login, MastoClient, UpdateCredentialsParams } from 'masto';
+import { Attachment, login, MastoClient } from 'masto';
 import { Log } from './Log';
 import fs from 'fs';
 import config from 'config';
