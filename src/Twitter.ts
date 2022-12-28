@@ -4,30 +4,23 @@ import fs from 'fs';
 import axios from 'axios';
 import { tmpFolder } from '.';
 import config from 'config';
-import path from 'path';
-import { HttpsProxyAgent } from 'https-proxy-agent';
 import { promisify } from 'util';
 import stream from 'stream';
+import { LinkShortener } from './LinkShortener';
+import { DBCache } from './DBCache';
 
-export const cacheFile = path.join(__dirname, '/../', 'cache.json');
 const finishedDownload = promisify(stream.finished);
 
 export class Twitter {
 	private static twitterClient: Client;
 	private static twitterAccessToken: string;
 	private static twitterAccountId: string;
-	private static proxyURL: string;
-	private static httpsAgent: HttpsProxyAgent;
 
 	public static async init() {
 		Log.info(`Setting up twitter client`);
 
-		Log.debug(`Setting cacheFile to ${cacheFile}`);
-
 		this.twitterAccessToken = config.get('twitterAccessToken');
 		this.twitterAccountId = config.get('twitterAccountId');
-		this.proxyURL = config.get("proxyURL");
-		this.httpsAgent = new HttpsProxyAgent(this.proxyURL);
 
 		this.twitterClient = new Client(this.twitterAccessToken);
 
@@ -35,11 +28,7 @@ export class Twitter {
 	}
 
 	public static async getTweets() {
-		if(!fs.existsSync(cacheFile)) {
-			fs.writeFileSync(cacheFile, JSON.stringify({}));
-		}
-
-		let cachedTweetId = JSON.parse(fs.readFileSync(cacheFile).toString()).lastTweetId;
+		let cachedTweetId = await DBCache.getLastTweetId();
 		let lastTweetId = cachedTweetId;
 		let response;
 
@@ -81,7 +70,8 @@ export class Twitter {
 			],
 			'tweet.fields': [
 				'created_at',
-				'source'
+				'entities',
+				'referenced_tweets'
 			],
 			since_id: lastTweetId
 		});
@@ -96,17 +86,13 @@ export class Twitter {
 
 		if(response.data?.length > 0) {
 			const tweets = response.data.sort((tweetA, tweetB) => { return new Date(tweetA.created_at).getTime() - new Date(tweetB.created_at).getTime() });
-			const { httpsAgent } = this;
 
 			for(const tweet of tweets) {
 				try {
-					const { id: tweetId, text, attachments, source } = tweet;
+					const { id: tweetId, text, attachments, entities, referenced_tweets } = tweet;
+
 					const downloadedFilePaths = new Array<string>();
 					let i = 0;
-
-					Log.info(`Processing tweet id: ${tweetId}`);
-					Log.info(`text: ${text}`);
-					Log.info(`attachments: ${attachments?.media_keys?.length}`);
 
 					if(attachments?.media_keys?.length > 0 && response.includes?.media?.length > 0) {
 						const downloadPromisses = new Array<Promise<void>>();
@@ -138,8 +124,7 @@ export class Twitter {
 									const filePath = tmpFolder + '/' + i + '_' + tweetId + ending;
 									const writeStream = fs.createWriteStream(filePath);
 									const response = await axios.get(mediaURL, {
-										responseType: 'stream',
-										httpsAgent
+										responseType: 'stream'
 									});
 									response.data.pipe(writeStream);
 									await finishedDownload(writeStream);
@@ -157,12 +142,28 @@ export class Twitter {
 						await Promise.all(downloadPromisses);
 					}
 
+					let groomedText = text;
+					if(entities?.urls) {
+						for(const url of entities.urls) {
+							groomedText = groomedText.replace(url.url, url.expanded_url);
+						}
+						groomedText = await this.addSourceLink(tweetId, groomedText);
+					}
+
+					Log.info(`Processing tweet id: ${tweetId}`);
+					Log.info(`groomedText: ${groomedText}`);
+					Log.info(`attachments: ${attachments?.media_keys?.length}`);
+
+					const filteredReferencedTweet = referenced_tweets?.filter(tweet => tweet.type === 'replied_to')?.map(tweet => tweet.id)?.[0];
+
 					fetchedTweets.push({
 						id: tweetId,
-						text,
+						referencedTweet: filteredReferencedTweet,
+						text: groomedText,
 						downloadedFilePaths
 					});
 				} catch (error) {
+					console.log(error.message)
 					Log.error(error);
 				}
 			}
@@ -172,9 +173,17 @@ export class Twitter {
 
 		if(cachedTweetId !== lastTweetId) {
 			Log.debug(`Set last tweet id to: ${lastTweetId}`);
-			fs.writeFileSync(cacheFile, JSON.stringify({ lastTweetId }));
+			await DBCache.upsertLastTweetId(lastTweetId);
 		} 
 
 		return fetchedTweets;
+	}
+
+	private static async addSourceLink(tweetId: string, text : string) {
+		const sourceURL = `https://twitter.com/TheRocketBeans/status/${tweetId}`;
+
+		const shortenedURL = await LinkShortener.createShortenedLink(sourceURL);
+
+		return text + `\n\nQuelle: ${shortenedURL ? shortenedURL : sourceURL}`;
 	}
 }

@@ -4,4 +4,4 @@
 .env/
 /config/default.json
 /tmp
-cache.json
+cache.db

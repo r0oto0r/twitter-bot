@@ -5,6 +5,7 @@ import { Twitter } from './Twitter';
 import path from 'path';
 import config from 'config';
 import { LinkShortener } from './LinkShortener';
+import { DBCache } from './DBCache';
 
 export const tmpFolder = path.join(__dirname, '/../', '/tmp');
 
@@ -24,9 +25,8 @@ const syncTweets = async () => {
 
 		if(tweets.length > 0) {
 			for(const tweet of tweets) {
-				const { id, text, downloadedFilePaths } = tweet;
 				try {
-					await Mastodon.createStatus(id, text, downloadedFilePaths);
+					await Mastodon.createStatus(tweet);
 				} catch (error) {
 					Log.error(error);
 				}
@@ -52,6 +52,7 @@ const syncTweets = async () => {
 
 		Log.debug(`Setting tmpFolder to ${tmpFolder}`);
 
+		await DBCache.init();
 		await LinkShortener.init();
 		await Mastodon.init();
 		await Twitter.init();
