@@ -163,8 +163,7 @@ export class Twitter {
 						downloadedFilePaths
 					});
 				} catch (error) {
-					console.log(error.message)
-					Log.error(error);
+					Log.error(error.message);
 				}
 			}
 
@@ -173,7 +172,11 @@ export class Twitter {
 
 		if(cachedTweetId !== lastTweetId) {
 			Log.debug(`Set last tweet id to: ${lastTweetId}`);
-			await DBCache.upsertLastTweetId(lastTweetId);
+			try {
+				await DBCache.updateLastTweetId(lastTweetId);
+			} catch (error) {
+				Log.error(error.message);
+			}
 		} 
 
 		return fetchedTweets;

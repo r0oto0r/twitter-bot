@@ -26,16 +26,16 @@ export class DBCache {
 
 	private static async createTables() {
 		if(!(await DBCache.knex.schema.hasTable(STATUS_ID_CACHE_TABLE))) {
-                Log.info(`No status id cache table found. Creating it.`);
+            Log.info(`No status id cache table found. Creating it.`);
 
-				await DBCache.knex.schema.createTable(STATUS_ID_CACHE_TABLE, (table) => {
-				table.string('tweetId').primary();
-				table.string('statusId').unique().notNullable();
-				table.timestamps({
-					defaultToNow: true,
-					useCamelCase: true
-				});
-			});
+            await DBCache.knex.schema.createTable(STATUS_ID_CACHE_TABLE, (table) => {
+                table.string('tweetId').primary();
+                table.string('statusId').unique().notNullable();
+                table.timestamps({
+                    defaultToNow: true,
+                    useCamelCase: true
+                });
+            });
 		}
 
         if(!(await DBCache.knex.schema.hasTable(LAST_TWEET_ID_TABLE))) {
@@ -43,17 +43,19 @@ export class DBCache {
 
             await DBCache.knex.schema.createTable(LAST_TWEET_ID_TABLE, (table) => {
                 table.increments('id').primary().notNullable();
-                table.string('tweetId').unique().notNullable();
+                table.string('tweetId').unique().nullable();
                 table.timestamps({
                     defaultToNow: true,
                     useCamelCase: true
                 });
-        });
-    }
+            });
+
+            await DBCache.knex.insert({ id: 0, tweetId: null }).into((LAST_TWEET_ID_TABLE));
+        }
 	}
 
-    public static async upsertStatusId(tweetId: string, statusId: string) {
-        return DBCache.knex.insert({ tweetId, statusId }).into(STATUS_ID_CACHE_TABLE).onConflict().ignore();
+    public static async insertStatusId(tweetId: string, statusId: string) {
+        return DBCache.knex.insert({ tweetId, statusId }).into(STATUS_ID_CACHE_TABLE);
     }
 
     public static async getStatusId(tweetId: string) {
@@ -63,8 +65,8 @@ export class DBCache {
         }
     }
 
-    public static async upsertLastTweetId(tweetId: string) {
-        return DBCache.knex.insert({ id: 0, tweetId }).into(LAST_TWEET_ID_TABLE).onConflict().ignore();
+    public static async updateLastTweetId(tweetId: string) {
+        return DBCache.knex(LAST_TWEET_ID_TABLE).where({ id: 0 }).update({ tweetId });
     }
 
     public static async getLastTweetId() {

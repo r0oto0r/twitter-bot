@@ -28,7 +28,7 @@ const syncTweets = async () => {
 				try {
 					await Mastodon.createStatus(tweet);
 				} catch (error) {
-					Log.error(error);
+					Log.error(error.message);
 				}
 			}
 		}

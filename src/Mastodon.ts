@@ -84,6 +84,13 @@ export class Mastodon {
 
 	public static async createStatus(tweet: any) {
 		const { id: tweetId, text, downloadedFilePaths, referencedTweet } = tweet;
+
+		const existingStatusId = await DBCache.getStatusId(tweetId);
+		if(existingStatusId) {
+			Log.warn(`Refusing to repost duplicated tweet for id ${tweetId}.`);
+			return;
+		}
+
 		const uploadedMedia = new Array<Attachment>();
 		if(downloadedFilePaths?.length > 0) {
 			const uploadPromisses = new Array<Promise<void>>();
@@ -101,7 +108,7 @@ export class Mastodon {
 			try {
 				await Promise.all(uploadPromisses);
 			} catch (error) {
-				Log.error(error);
+				Log.error(error.message);
 			}
 		}
 
@@ -124,8 +131,10 @@ export class Mastodon {
 		});
 
 		if(response?.id) {
-			await DBCache.upsertStatusId(tweetId, response.id);
+			await DBCache.insertStatusId(tweetId, response.id);
 		}
+
+		return response?.id;
 	}
 
 	public static async createMediaAttachments(path: string) {
