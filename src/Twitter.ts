@@ -147,8 +147,9 @@ export class Twitter {
 						for(const url of entities.urls) {
 							groomedText = groomedText.replace(url.url, url.expanded_url);
 						}
-						groomedText = await this.addSourceLink(tweetId, groomedText);
 					}
+
+					groomedText = await this.addSourceLink(tweetId, groomedText);
 
 					Log.info(`Processing tweet id: ${tweetId}`);
 					Log.info(`groomedText: ${groomedText}`);
