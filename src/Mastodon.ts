@@ -65,6 +65,8 @@ export class Mastodon {
 
 	public static async updateProfile() {
 		return this.masto.accounts.updateCredentials({
+			bot: true,
+			discoverable: true,
 			fieldsAttributes: [
 				{
 					name: 'Kontakt',
