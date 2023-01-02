@@ -151,9 +151,9 @@ export class Twitter {
 
 					groomedText = await this.addSourceLink(tweetId, groomedText);
 
-					Log.info(`Processing tweet id: ${tweetId}`);
-					Log.info(`groomedText: ${groomedText}`);
-					Log.info(`attachments: ${attachments?.media_keys?.length}`);
+					Log.debug(`Processing tweet id: ${tweetId}`);
+					Log.debug(`groomedText: ${groomedText}`);
+					Log.debug(`attachments: ${attachments?.media_keys?.length}`);
 
 					const filteredReferencedTweet = referenced_tweets?.filter(tweet => tweet.type === 'replied_to')?.map(tweet => tweet.id)?.[0];
 

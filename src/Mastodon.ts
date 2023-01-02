@@ -115,8 +115,8 @@ export class Mastodon {
 		const groomedText = await this.groomText(text);
 
 		Log.info(`Posting toot for tweet id: ${tweetId}`);
-		Log.info(`groomed text: ${groomedText}`);
-		Log.info(`attachments: ${downloadedFilePaths?.length} ${downloadedFilePaths} ${uploadedMedia.map(media => media.id)}`);
+		Log.info(`Groomed text: ${groomedText}`);
+		Log.info(`Attachments: ${downloadedFilePaths?.length} ${downloadedFilePaths} ${uploadedMedia.map(media => media.id)}`);
 
 		let inReplyToId;
 		if(referencedTweet) {
