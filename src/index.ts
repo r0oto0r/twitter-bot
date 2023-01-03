@@ -46,7 +46,7 @@ const syncTweets = async () => {
 
 (async () => {
     try {
-		Log.info(`Booting Twitter to Mastodon Bot`);
+		Log.info(`Booting Twitter to Mastodon Bot Version ${process.env.npm_package_version}`);
 
 		const refreshMillis = config.get("refreshMillis") as number;
 

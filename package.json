@@ -1,12 +1,12 @@
 {
 	"name": "twitter-bot",
-	"version": "1.0.8",
+	"version": "1.0.9",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"start": "tsc && node out/index.js",
+		"start": "npm run transpile && node out/index.js",
 		"start-without-transpile": "node out/index.js",
-		"transpile": "tsc",
+		"transpile": "npm install && tsc",
 		"docker-image": "docker build . -t twitter-bot"
 	},
 	"author": "",

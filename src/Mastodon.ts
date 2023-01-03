@@ -8,7 +8,6 @@ import { DBCache } from './DBCache';
 export class Mastodon {
 	private static masto: MastoClient;
 	private static twitterHandleRegex = /(@[a-zA-Z0-9_]+)/gm;
-	private static version: string;
 	private static twitterMediaLinkRegex = /https:\/\/twitter\.com\/TheRocketBeans\/status\/\d*\/(video|photo)\/\d*/gm;
 	private static twitterMastodonHandleMap: { [twitterHandle: string]: string };
 
@@ -16,7 +15,6 @@ export class Mastodon {
 		Log.info(`Setting up mastodon client`);
 
 		this.twitterMastodonHandleMap = config.get('twitterMastodonHandleMap');
-		this.version = config.get('version');
 
 		this.masto = await login({
 			url: config.get('mastodonBaseUrl'),
@@ -57,7 +55,7 @@ export class Mastodon {
 		let result = text;
 		const twitterMediaLinks = text.matchAll(this.twitterMediaLinkRegex);
 		for(const [twitterMediaLink] of twitterMediaLinks) {
-				result = result.replace(twitterMediaLink, '');
+			result = result.replace(twitterMediaLink, '');
 		}
 
 		return result;
@@ -72,7 +70,7 @@ export class Mastodon {
 				},
 				{
 					name: 'Version',
-					value: this.version
+					value: process.env.npm_package_version
 				},
 				{
 					name: 'Last Sync',
