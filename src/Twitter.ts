@@ -4,12 +4,9 @@ import fs from 'fs';
 import axios from 'axios';
 import { tmpFolder } from '.';
 import config from 'config';
-import { promisify } from 'util';
-import stream from 'stream';
+import stream from 'stream/promises';
 import { LinkShortener } from './LinkShortener';
 import { DBCache } from './DBCache';
-
-const finishedDownload = promisify(stream.finished);
 
 export class Twitter {
 	private static twitterClient: Client;
@@ -127,7 +124,7 @@ export class Twitter {
 										responseType: 'stream'
 									});
 									response.data.pipe(writeStream);
-									await finishedDownload(writeStream);
+									await stream.finished(writeStream);
 									downloadedFilePaths.push(filePath);
 									resolve();
 								} catch (error) {
@@ -178,7 +175,7 @@ export class Twitter {
 			} catch (error) {
 				Log.error(error.message);
 			}
-		} 
+		}
 
 		return fetchedTweets;
 	}
