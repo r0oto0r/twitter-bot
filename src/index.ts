@@ -28,6 +28,8 @@ const syncTweets = async () => {
 			const replies = tweets.filter(tweet => tweet.referencedTweet);
 			const actualTweets = tweets.filter(tweet => !tweet.referencedTweet);
 
+			Log.info(`We have ${actualTweets.length} actual tweets and ${replies.length} replies`);
+
 			for(const tweet of actualTweets) {
 				try {
 					await Mastodon.createStatus(tweet);
