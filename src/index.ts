@@ -66,13 +66,32 @@ const syncTweets = async () => {
 
 		Log.debug(`Setting tmpFolder to ${tmpFolder}`);
 
-		await DBCache.init();
-		await LinkShortener.init();
-		await Mastodon.init();
+		//await DBCache.init();
+		//await LinkShortener.init();
+		//await Mastodon.init();
 		await Twitter.init();
 
-		await syncTweets();
-		setInterval(syncTweets, refreshMillis);
+		console.log(JSON.stringify((await Twitter.twitterClient.tweets.usersIdTweets(Twitter.twitterAccountId, {
+			exclude: [
+				'replies',
+				'retweets'
+			],
+			expansions: [
+				'attachments.media_keys'
+			],
+			'media.fields': [
+				'url',
+				'variants'
+			],
+			'tweet.fields': [
+				'created_at',
+				'entities',
+				'referenced_tweets'
+			]
+		})).data, null, 2));
+
+		//await syncTweets();
+		//setInterval(syncTweets, refreshMillis);
     } catch (error: any) {
         Log.error(`Error occured: ${error}`);
     }

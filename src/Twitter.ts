@@ -9,9 +9,9 @@ import { LinkShortener } from './LinkShortener';
 import { DBCache } from './DBCache';
 
 export class Twitter {
-	private static twitterClient: Client;
+	public static twitterClient: Client;
 	private static twitterAccessToken: string;
-	private static twitterAccountId: string;
+	public static twitterAccountId: string;
 
 	public static async init() {
 		Log.info(`Setting up twitter client`);
