@@ -24,9 +24,21 @@ const syncTweets = async () => {
 		const tweets = await Twitter.getTweets();
 
 		if(tweets.length > 0) {
-			for(const tweet of tweets) {
+
+			const replies = tweets.filter(tweet => tweet.referencedTweet);
+			const actualTweets = tweets.filter(tweet => !tweet.referencedTweet);
+
+			for(const tweet of actualTweets) {
 				try {
 					await Mastodon.createStatus(tweet);
+				} catch (error) {
+					Log.error(error.message);
+				}
+			}
+
+			for(const reply of replies) {
+				try {
+					await Mastodon.createStatus(reply);
 				} catch (error) {
 					Log.error(error.message);
 				}
