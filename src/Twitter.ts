@@ -82,7 +82,7 @@ export class Twitter {
 		const fetchedTweets = new Array<any>();
 
 		if(response.data?.length > 0) {
-			const tweets = response.data.sort((tweetA, tweetB) => { return new Date(tweetA.created_at).getTime() - new Date(tweetB.created_at).getTime() });
+			const tweets = response.data.reverse();
 
 			for(const tweet of tweets) {
 				try {

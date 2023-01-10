@@ -24,29 +24,14 @@ const syncTweets = async () => {
 		const tweets = await Twitter.getTweets();
 
 		if(tweets.length > 0) {
-
-			const replies = tweets.filter(tweet => tweet.referencedTweet);
-			const actualTweets = tweets.filter(tweet => !tweet.referencedTweet);
-
-			Log.info(`We have ${actualTweets.length} actual tweets and ${replies.length} replies`);
-
-			for(const tweet of actualTweets) {
+			for(const tweet of tweets) {
 				try {
 					await Mastodon.createStatus(tweet);
 				} catch (error) {
 					Log.error(error.message);
 				}
 			}
-
-			for(const reply of replies) {
-				try {
-					await Mastodon.createStatus(reply);
-				} catch (error) {
-					Log.error(error.message);
-				}
-			}
 		}
-
 	} catch (error) {
 		Log.error(error);
 	} finally {
@@ -66,32 +51,13 @@ const syncTweets = async () => {
 
 		Log.debug(`Setting tmpFolder to ${tmpFolder}`);
 
-		//await DBCache.init();
-		//await LinkShortener.init();
-		//await Mastodon.init();
+		await DBCache.init();
+		await LinkShortener.init();
+		await Mastodon.init();
 		await Twitter.init();
 
-		console.log(JSON.stringify((await Twitter.twitterClient.tweets.usersIdTweets(Twitter.twitterAccountId, {
-			exclude: [
-				'replies',
-				'retweets'
-			],
-			expansions: [
-				'attachments.media_keys'
-			],
-			'media.fields': [
-				'url',
-				'variants'
-			],
-			'tweet.fields': [
-				'created_at',
-				'entities',
-				'referenced_tweets'
-			]
-		})).data, null, 2));
-
-		//await syncTweets();
-		//setInterval(syncTweets, refreshMillis);
+		await syncTweets();
+		setInterval(syncTweets, refreshMillis);
     } catch (error: any) {
         Log.error(`Error occured: ${error}`);
     }
