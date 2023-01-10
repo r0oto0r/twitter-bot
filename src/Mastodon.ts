@@ -119,6 +119,10 @@ export class Mastodon {
 		let inReplyToId;
 		if(referencedTweet) {
 			inReplyToId = await DBCache.getStatusId(referencedTweet);
+			if(!inReplyToId) {
+				Log.info(`Not posting tweet id: ${tweetId} because refrenced tweet id: ${referencedTweet} has not been posted yet or is missing`);
+				return;
+			}
 		}
 
 		const response = await this.masto.statuses.create({
