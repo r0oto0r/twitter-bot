@@ -113,8 +113,8 @@ export class Mastodon {
 		const groomedText = await this.groomText(text);
 
 		Log.info(`Posting toot for tweet id: ${tweetId}`);
-		Log.info(`Groomed text: ${groomedText}`);
-		Log.info(`Attachments: ${downloadedFilePaths?.length} ${downloadedFilePaths} ${uploadedMedia.map(media => media.id)}`);
+		Log.info(`Groomed text:\n${groomedText}`);
+		Log.info(`Attachments: ${downloadedFilePaths?.length} ${downloadedFilePaths} ${uploadedMedia.map(media => media.id)}\n`);
 
 		let inReplyToId;
 		if(referencedTweet) {
@@ -122,6 +122,8 @@ export class Mastodon {
 			if(!inReplyToId) {
 				Log.info(`Not posting tweet id: ${tweetId} because refrenced tweet id: ${referencedTweet} has not been posted yet or is missing`);
 				return;
+			} else {
+				Log.info(`Posting toot for tweet id: ${tweetId} in reply to ${inReplyToId}`);
 			}
 		}
 
