@@ -39,11 +39,15 @@ export class Mastodon {
 	private static replaceHandles(text: string) {
 		let result = text;
 		const twitterHandles = text.matchAll(this.twitterHandleRegex);
+		const handleSet = new Set<string>();
+
 		for(const [twitterHandle] of twitterHandles) {
-			if(this.twitterMastodonHandleMap && this.twitterMastodonHandleMap[twitterHandle]) {
-				result = result.replace(twitterHandle, this.twitterMastodonHandleMap[twitterHandle]);
-			} else {
-				result = result.replace(twitterHandle, twitterHandle + '@twtr');
+			if(!handleSet.has(twitterHandle)) {
+				result = result.replaceAll(
+					twitterHandle,
+					this.twitterMastodonHandleMap?.[twitterHandle] ? this.twitterMastodonHandleMap[twitterHandle] : twitterHandle + '@twtr'
+				);
+				handleSet.add(twitterHandle);
 			}
 		}
 
