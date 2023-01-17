@@ -24,7 +24,7 @@ export class Twitter {
 		Log.info(`Done setting up twitter client`);
 	}
 
-	public static async getTweets() {
+	public static async getTweets(): Promise<Array<{ filePath: string; altText: string }>> {
 		let cachedTweetId = await DBCache.getLastTweetId();
 		let lastTweetId = cachedTweetId;
 		let response;
@@ -63,7 +63,8 @@ export class Twitter {
 			],
 			'media.fields': [
 				'url',
-				'variants'
+				'variants',
+				'alt_text'
 			],
 			'tweet.fields': [
 				'created_at',
@@ -88,7 +89,7 @@ export class Twitter {
 				try {
 					const { id: tweetId, text, attachments, entities, referenced_tweets } = tweet;
 
-					const downloadedFilePaths = new Array<string>();
+					const attachedMedia = new Array<{ filePath: string; altText: string }>();
 					let i = 0;
 
 					if(attachments?.media_keys?.length > 0 && response.includes?.media?.length > 0) {
@@ -125,7 +126,10 @@ export class Twitter {
 									});
 									response.data.pipe(writeStream);
 									await stream.finished(writeStream);
-									downloadedFilePaths.push(filePath);
+									attachedMedia.push({
+										filePath,
+										altText: media.alt_text
+									});
 									resolve();
 								} catch (error) {
 									Log.error(error);
@@ -158,7 +162,7 @@ export class Twitter {
 						id: tweetId,
 						referencedTweet: filteredReferencedTweet,
 						text: groomedText,
-						downloadedFilePaths
+						attachedMedia
 					});
 				} catch (error) {
 					Log.error(error.message);

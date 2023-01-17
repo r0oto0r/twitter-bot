@@ -85,7 +85,7 @@ export class Mastodon {
 	}
 
 	public static async createStatus(tweet: any) {
-		const { id: tweetId, text, downloadedFilePaths, referencedTweet } = tweet;
+		const { id: tweetId, text, attachedMedia, referencedTweet } = tweet;
 
 		const existingStatusId = await DBCache.getStatusId(tweetId);
 		if(existingStatusId) {
@@ -94,12 +94,12 @@ export class Mastodon {
 		}
 
 		const uploadedMedia = new Array<Attachment>();
-		if(downloadedFilePaths?.length > 0) {
+		if(attachedMedia?.length > 0) {
 			const uploadPromisses = new Array<Promise<void>>();
-			for(const path of downloadedFilePaths) {
+			for(const { filePath, altText } of attachedMedia) {
 				uploadPromisses.push(new Promise<void>(async (resolve, reject) => {
 					try {
-						uploadedMedia.push(await Mastodon.createMediaAttachments(path));
+						uploadedMedia.push(await Mastodon.createMediaAttachments(filePath, altText));
 						resolve();
 					} catch (error) {
 						Log.error(error);
@@ -118,7 +118,7 @@ export class Mastodon {
 
 		Log.info(`Posting toot for tweet id: ${tweetId}`);
 		Log.info(`Groomed text:\n${groomedText}`);
-		Log.info(`Attachments: ${downloadedFilePaths?.length} ${downloadedFilePaths} ${uploadedMedia.map(media => media.id)}\n`);
+		Log.info(`Attachments: ${attachedMedia?.length} ${attachedMedia?.map((media: any) => media.filePath)} ${uploadedMedia.map(media => media.id)}\n`);
 
 		let inReplyToId;
 		if(referencedTweet) {
@@ -134,7 +134,7 @@ export class Mastodon {
 		const response = await this.masto.statuses.create({
 			status: groomedText,
 			visibility: process.env.DEBUG ? 'private' : 'public',
-			mediaIds: downloadedFilePaths?.length > 0 ? uploadedMedia.map(media => media.id) : undefined,
+			mediaIds: uploadedMedia?.length > 0 ? uploadedMedia.map(media => media.id) : undefined,
 			inReplyToId
 		});
 
@@ -145,13 +145,14 @@ export class Mastodon {
 		return response?.id;
 	}
 
-	public static async createMediaAttachments(path: string) {
+	public static async createMediaAttachments(path: string, altText: string) {
 		if(fs.existsSync(path)) {
 			try {
 				const file = fs.createReadStream(path);
 
 				const attachment = await this.masto.mediaAttachments.create({
-					file
+					file,
+					description: altText
 				});
 
 				return attachment;
