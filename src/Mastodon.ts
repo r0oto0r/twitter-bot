@@ -1,4 +1,4 @@
-import { Attachment, login, MastoClient } from 'masto';
+import { login, mastodon } from 'masto';
 import { Log } from './Log';
 import fs from 'fs';
 import config from 'config';
@@ -6,7 +6,7 @@ import moment from 'moment-timezone';
 import { DBCache } from './DBCache';
 
 export class Mastodon {
-	private static masto: MastoClient;
+	private static masto: mastodon.Client;
 	private static twitterHandleRegex = /(@[a-zA-Z0-9_]+)/gm;
 	private static twitterMediaLinkRegex = /https:\/\/twitter\.com\/TheRocketBeans\/status\/\d*\/(video|photo)\/\d*/gm;
 	private static twitterMastodonHandleMap: { [twitterHandle: string]: string };
@@ -20,7 +20,7 @@ export class Mastodon {
 			url: config.get('mastodonBaseUrl'),
 			accessToken: config.get('mastodonAccessToken'),
 			timeout: 60 * 5 * 1000
-		});
+		});;
 
 		Log.info(`Done setting up mastodon client`);
 	}
@@ -66,7 +66,7 @@ export class Mastodon {
 	}
 
 	public static async updateProfile() {
-		return this.masto.accounts.updateCredentials({
+		return this.masto.v1.accounts.updateCredentials({
 			fieldsAttributes: [
 				{
 					name: 'Kontakt',
@@ -93,9 +93,9 @@ export class Mastodon {
 			return;
 		}
 
-		let uploadedMedia = new Array<Attachment>();
+		let uploadedMedia = new Array<mastodon.v1.MediaAttachment>();
 		if(attachedMedia?.length > 0) {
-			const uploadPromisses = new Array<Promise<Attachment>>();
+			const uploadPromisses = new Array<Promise<mastodon.v1.MediaAttachment>>();
 			for(const { filePath, altText } of attachedMedia) {
 				uploadPromisses.push(Mastodon.createMediaAttachments(filePath, altText));
 			}
@@ -119,7 +119,7 @@ export class Mastodon {
 			}
 		}
 
-		const response = await this.masto.statuses.create({
+		const response = await this.masto.v1.statuses.create({
 			status: groomedText,
 			visibility: process.env.DEBUG ? 'private' : 'public',
 			mediaIds: uploadedMedia?.length > 0 ? uploadedMedia.map(media => media.id) : undefined,
@@ -141,7 +141,7 @@ export class Mastodon {
 
 				Log.debug(`Creating media: path ${path}\n${altText}`);
 
-				const attachment = await this.masto.mediaAttachments.create({
+				const attachment = await this.masto.v2.mediaAttachments.create({
 					file,
 					description: altText ? altText : null
 				});
