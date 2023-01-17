@@ -44,21 +44,17 @@ const syncTweets = async () => {
 }
 
 (async () => {
-    try {
-		Log.info(`Booting Twitter to Mastodon Bot Version ${process.env.npm_package_version}`);
+	Log.info(`Booting Twitter to Mastodon Bot Version ${process.env.npm_package_version}`);
 
-		const refreshMillis = config.get("refreshMillis") as number;
+	const refreshMillis = config.get("refreshMillis") as number;
 
-		Log.debug(`Setting tmpFolder to ${tmpFolder}`);
+	Log.debug(`Setting tmpFolder to ${tmpFolder}`);
 
-		await DBCache.init();
-		await LinkShortener.init();
-		await Mastodon.init();
-		await Twitter.init();
+	await DBCache.init();
+	await LinkShortener.init();
+	await Mastodon.init();
+	await Twitter.init();
 
-		await syncTweets();
-		setInterval(syncTweets, refreshMillis);
-    } catch (error: any) {
-        Log.error(`Error occured: ${error}`);
-    }
+	await syncTweets();
+	setInterval(syncTweets, refreshMillis);
 })();

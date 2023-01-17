@@ -4,10 +4,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=twitterbot
-Environment=PORT=8080
-WorkingDirectory=/home/twitter-bot/
-ExecStart=/usr/bin/npm run start
+User=r0ot
+Environment=
+WorkingDirectory=/home/r0ot/twitter-bot/
+ExecStart=npm run start
 Restart=on-failure
 
 [Install]
