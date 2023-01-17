@@ -8,7 +8,7 @@ import { DBCache } from './DBCache';
 
 export class Mastodon {
 	private static masto: mastodon.Client;
-	private static twitterHandleRegex = /(@[a-zA-Z0-9_]+)/gm;
+	private static twitterHandleRegex = /\s(@[a-zA-Z0-9_]+)/gm;
 	private static twitterMediaLinkRegex = /https:\/\/twitter\.com\/TheRocketBeans\/status\/\d*\/(video|photo)\/\d*/gm;
 	private static twitterMastodonHandleMap: { [twitterHandle: string]: string };
 
