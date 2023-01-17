@@ -139,6 +139,8 @@ export class Mastodon {
 			try {
 				const file = fs.createReadStream(path);
 
+				Log.debug(`Creating media: path ${path}\n${altText}`);
+
 				const attachment = await this.masto.mediaAttachments.create({
 					file,
 					description: altText
@@ -147,7 +149,6 @@ export class Mastodon {
 				return attachment;
 			} catch (error) {
 				Log.error(error);
-				throw `Couldn't create media attachment`;
 			}
 		} else {
 			throw `${path} not found!`;
