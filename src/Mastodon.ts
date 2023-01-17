@@ -111,6 +111,7 @@ export class Mastodon {
 				await Promise.all(uploadPromisses);
 			} catch (error) {
 				Log.error(error.message);
+				throw `Failed to upload media. Aborting.`;
 			}
 		}
 
