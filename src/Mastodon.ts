@@ -143,12 +143,15 @@ export class Mastodon {
 
 				const attachment = await this.masto.mediaAttachments.create({
 					file,
-					description: altText
+					description: altText ? altText : null
 				});
+
+				Log.debug(`Created attachment: ${attachment?.id}`);
 
 				return attachment;
 			} catch (error) {
 				Log.error(error);
+				throw `Failed to create media ${path}`;
 			}
 		} else {
 			throw `${path} not found!`;
