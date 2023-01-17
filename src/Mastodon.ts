@@ -1,4 +1,5 @@
-import { login, mastodon } from 'masto';
+import type { mastodon } from 'masto';
+import { login } from 'masto';
 import { Log } from './Log';
 import fs from 'fs';
 import config from 'config';
@@ -18,9 +19,8 @@ export class Mastodon {
 
 		this.masto = await login({
 			url: config.get('mastodonBaseUrl'),
-			accessToken: config.get('mastodonAccessToken'),
-			timeout: 60 * 5 * 1000
-		});;
+			accessToken: config.get('mastodonAccessToken')
+		});
 
 		Log.info(`Done setting up mastodon client`);
 	}
@@ -143,7 +143,7 @@ export class Mastodon {
 
 				const attachment = await this.masto.v2.mediaAttachments.create({
 					file,
-					description: altText ? altText : null
+					//description: altText ? altText : null
 				});
 
 				Log.debug(`Created attachment: ${attachment?.id}`);
