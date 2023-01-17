@@ -24,12 +24,12 @@ const syncTweets = async () => {
 		const tweets = await Twitter.getTweets();
 
 		if(tweets.length > 0) {
-			for(const tweet of tweets) {
-				try {
+			try {
+				for(const tweet of tweets) {
 					await Mastodon.createStatus(tweet);
-				} catch (error) {
-					Log.error(error.message);
 				}
+			} catch (error) {
+				Log.error(error.message);
 			}
 		}
 	} catch (error) {

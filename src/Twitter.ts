@@ -26,7 +26,6 @@ export class Twitter {
 
 	public static async getTweets(): Promise<Array<{ filePath: string; altText: string }>> {
 		let cachedTweetId = await DBCache.getLastTweetId();
-		let lastTweetId = cachedTweetId;
 		let response;
 
 		if(!cachedTweetId || cachedTweetId.length < 1) {
@@ -43,12 +42,12 @@ export class Twitter {
 				return;
 			}
 
-			lastTweetId = response.data[0].id;
+			cachedTweetId = response.data[0].id;
 		} else {
-			Log.debug(`Using cached tweet id: ${lastTweetId}`);
+			Log.debug(`Using cached tweet id: ${cachedTweetId}`);
 		}
 
-		if(!lastTweetId || lastTweetId.length < 1) {
+		if(!cachedTweetId || cachedTweetId.length < 1) {
 			Log.error('No last tweet found');
 			return;
 		}
@@ -71,7 +70,7 @@ export class Twitter {
 				'entities',
 				'referenced_tweets'
 			],
-			since_id: lastTweetId
+			since_id: cachedTweetId
 		});
 
 		if(response.meta.result_count < 1) {
@@ -168,17 +167,6 @@ export class Twitter {
 					Log.error(error.message);
 				}
 			}
-
-			lastTweetId = response.data[response.data.length - 1].id;
-		}
-
-		if(cachedTweetId !== lastTweetId) {
-			Log.debug(`Set last tweet id to: ${lastTweetId}`);
-			try {
-				await DBCache.updateLastTweetId(lastTweetId);
-			} catch (error) {
-				Log.error(error.message);
-			}
 		}
 
 		return fetchedTweets;
@@ -186,9 +174,7 @@ export class Twitter {
 
 	private static async addSourceLink(tweetId: string, text : string) {
 		const sourceURL = `https://twitter.com/TheRocketBeans/status/${tweetId}`;
-
 		const shortenedURL = await LinkShortener.createShortenedLink(sourceURL);
-
 		return text + `\n\nQuelle: ${shortenedURL ? shortenedURL : sourceURL}`;
 	}
 }

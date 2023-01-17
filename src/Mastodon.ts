@@ -93,26 +93,13 @@ export class Mastodon {
 			return;
 		}
 
-		const uploadedMedia = new Array<Attachment>();
+		let uploadedMedia = new Array<Attachment>();
 		if(attachedMedia?.length > 0) {
-			const uploadPromisses = new Array<Promise<void>>();
+			const uploadPromisses = new Array<Promise<Attachment>>();
 			for(const { filePath, altText } of attachedMedia) {
-				uploadPromisses.push(new Promise<void>(async (resolve, reject) => {
-					try {
-						uploadedMedia.push(await Mastodon.createMediaAttachments(filePath, altText));
-						resolve();
-					} catch (error) {
-						Log.error(error);
-						reject();
-					}
-				}));
+				uploadPromisses.push(Mastodon.createMediaAttachments(filePath, altText));
 			}
-			try {
-				await Promise.all(uploadPromisses);
-			} catch (error) {
-				Log.error(error.message);
-				throw `Failed to upload media. Aborting.`;
-			}
+			uploadedMedia = await Promise.all(uploadPromisses);
 		}
 
 		const groomedText = await this.groomText(text);
@@ -140,6 +127,7 @@ export class Mastodon {
 		});
 
 		if(response?.id) {
+			await DBCache.updateLastTweetId(tweetId);
 			await DBCache.insertStatusId(tweetId, response.id);
 		}
 
