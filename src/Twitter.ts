@@ -164,7 +164,7 @@ export class Twitter {
 						attachedMedia
 					});
 				} catch (error) {
-					Log.error(error.message);
+					Log.error(error);
 				}
 			}
 		}
