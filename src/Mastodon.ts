@@ -140,6 +140,8 @@ export class Mastodon {
 				const attachment = await this.masto.v2.mediaAttachments.create({
 					file: fs.readFileSync(path),
 					description: altText
+				}, {
+					skipPolling: true
 				});
 
 				Log.debug(`Created attachment: ${attachment?.id}`);
