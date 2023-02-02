@@ -24,6 +24,8 @@ const syncTweets = async () => {
 		const tweets = await Twitter.getTweets();
 
 		if(tweets.length > 0) {
+			Log.info(`Start tooting ${tweets.length} toots`);
+
 			try {
 				for(const tweet of tweets) {
 					await Mastodon.createStatus(tweet);
