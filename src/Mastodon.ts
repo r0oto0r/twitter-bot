@@ -19,7 +19,8 @@ export class Mastodon {
 
 		this.masto = await login({
 			url: config.get('mastodonBaseUrl'),
-			accessToken: config.get('mastodonAccessToken')
+			accessToken: config.get('mastodonAccessToken'),
+			disableVersionCheck: true
 		});
 
 		Log.info(`Done setting up mastodon client`);
@@ -140,8 +141,6 @@ export class Mastodon {
 				const attachment = await this.masto.v2.mediaAttachments.create({
 					file: fs.readFileSync(path),
 					description: altText
-				}, {
-					skipPolling: true
 				});
 
 				Log.debug(`Created attachment: ${attachment?.id}`);
