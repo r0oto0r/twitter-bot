@@ -146,8 +146,7 @@ export class Mastodon {
 
 				return attachment;
 			} catch (error) {
-				Log.error(error);
-				throw new Error(`Failed to create media ${path}`);
+				throw new Error(`Failed to create media ${path}: ${error}`);
 			}
 		} else {
 			throw new Error(`${path} not found!`);
