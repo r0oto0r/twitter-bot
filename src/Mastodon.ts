@@ -95,11 +95,9 @@ export class Mastodon {
 
 		let uploadedMedia = new Array<mastodon.v1.MediaAttachment>();
 		if(attachedMedia?.length > 0) {
-			const uploadPromisses = new Array<Promise<mastodon.v1.MediaAttachment>>();
 			for(const { filePath, altText } of attachedMedia) {
-				uploadPromisses.push(Mastodon.createMediaAttachments(filePath, altText));
+				uploadedMedia.push(await Mastodon.createMediaAttachments(filePath, altText));
 			}
-			uploadedMedia = await Promise.all(uploadPromisses);
 		}
 
 		const groomedText = await this.groomText(text);
