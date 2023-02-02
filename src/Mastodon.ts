@@ -138,7 +138,7 @@ export class Mastodon {
 				Log.debug(`Creating media: path ${path}${altText ? `\n${altText}` : ''}`);
 
 				const attachment = await this.masto.v2.mediaAttachments.create({
-					file: new Blob([fs.readFileSync(path)]),
+					file: fs.readFileSync(path),
 					description: altText ? altText : null
 				});
 
