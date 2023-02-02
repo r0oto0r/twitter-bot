@@ -31,7 +31,7 @@ const syncTweets = async () => {
 					await Mastodon.createStatus(tweet);
 				}
 			} catch (error) {
-				Log.error(error.message);
+				Log.error(`Failed tooting: ${error}`);
 			}
 		}
 	} catch (error) {
