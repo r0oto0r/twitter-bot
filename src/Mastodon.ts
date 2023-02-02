@@ -139,7 +139,7 @@ export class Mastodon {
 
 				const attachment = await this.masto.v2.mediaAttachments.create({
 					file: fs.readFileSync(path),
-					description: altText ? altText : null
+					description: altText
 				});
 
 				Log.debug(`Created attachment: ${attachment?.id}`);
