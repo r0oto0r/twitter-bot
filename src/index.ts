@@ -35,12 +35,16 @@ const syncTweets = async () => {
 			}
 		}
 	} catch (error) {
-		Log.error(error);
+		Log.error(`Failed to sync tweets: ${error}`);
 	} finally {
 		if(fs.existsSync(tmpFolder)) {
 			fs.rmSync(tmpFolder, { recursive: true });
 		}
-		await Mastodon.updateProfile();
+		try {
+			await Mastodon.updateProfile();
+		} catch (error) {
+			Log.error(`Failed to update profile: ${error}`);
+		}
 		running = false;
 	}
 }
