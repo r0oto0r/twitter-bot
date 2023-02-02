@@ -19,8 +19,7 @@ export class Mastodon {
 
 		this.masto = await login({
 			url: config.get('mastodonBaseUrl'),
-			accessToken: config.get('mastodonAccessToken'),
-			disableVersionCheck: true
+			accessToken: config.get('mastodonAccessToken')
 		});
 
 		Log.info(`Done setting up mastodon client`);
@@ -139,7 +138,7 @@ export class Mastodon {
 				Log.debug(`Creating media: path ${path}${altText ? `\n${altText}` : ''}`);
 
 				const attachment = await this.masto.v2.mediaAttachments.create({
-					file: fs.readFileSync(path),
+					file: new Blob([fs.readFileSync(path)]),
 					description: altText
 				});
 
@@ -148,10 +147,10 @@ export class Mastodon {
 				return attachment;
 			} catch (error) {
 				Log.error(error);
-				throw `Failed to create media ${path}`;
+				throw new Error(`Failed to create media ${path}`);
 			}
 		} else {
-			throw `${path} not found!`;
+			throw new Error(`${path} not found!`);
 		}
 	}
 }
