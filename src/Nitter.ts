@@ -115,9 +115,9 @@ export class Nitter {
 						parsedNitterTweets[referencedNitterTweetIndex] = parsedNitterTweet;
 						parsedNitterTweets[i] = referencedTweet;
 					}
-				} else {
-					lastParentTweetId = parsedNitterTweet.id;
 				}
+
+				lastParentTweetId = parsedNitterTweet.id;
 			}
 
 			for(let i = 0; i < parsedNitterTweets.length; i++) {
