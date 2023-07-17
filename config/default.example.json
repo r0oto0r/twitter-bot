@@ -5,5 +5,12 @@
 		"@Grziwatzki": "@amtavernentresen@rollenspiel.social"
 	},
 	"refreshMillis": 5000,
-	"twitterUserName": "TheRocketBeans"
+	"twitterUserName": "TheRocketBeans",
+	"nitterInstances": [
+		"https://nitter.lacontrevoie.fr",
+		"https://nitter.nixnet.services/",
+		"https://nitter.fdn.fr",
+		"nitter.kavin.rocks",
+		"nitter.unixfox.eu"
+	]
 }

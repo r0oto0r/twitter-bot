@@ -21,7 +21,6 @@ export interface ParsedNitterTweet {
 export class Nitter {
 	private static twitterUserName: string;
 	private static parser: XMLParser;
-	private static nitterBaseUrl: string;
 	private static fakeUserAgent = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
 
 	public static async init() {
@@ -29,15 +28,42 @@ export class Nitter {
 
 		this.twitterUserName = config.get('twitterUserName');
 		this.parser = new XMLParser();
-		this.nitterBaseUrl = 'https://nitter.lacontrevoie.fr';
 
 		Log.info(`Done setting up nitter client`);
 	}
 
+	private static async pickRandomNitterInstance(): Promise<string> {
+		const nitterInstances = config.get('nitterInstances') as Array<string>;
+		let randomIndex = Math.floor(Math.random() * nitterInstances.length);
+		let instanceAvailable = false;
+		let instanceIndex = 0;
+
+		while(!instanceAvailable) {
+			const instance = nitterInstances[randomIndex];
+			try {
+				const response = await axios.get(`${instance}/${this.twitterUserName}/rss`, {
+					headers: {
+						'User-Agent': this.fakeUserAgent
+					}
+				});
+				if(response.status === 200) {
+					instanceAvailable = true;
+				}
+			} catch (error) {
+				Log.error(`Instance ${instance} not available`);
+				instanceIndex++;
+				randomIndex = (randomIndex + instanceIndex) % nitterInstances.length;
+			}
+		}
+
+		return nitterInstances[randomIndex];
+	}
+
 	public static async getTweets(): Promise<Array<PreparedTweet>> {
 		let lastTweetId = await DBCache.getLastTweetId();
+		const nitterBaseUrl = await this.pickRandomNitterInstance();
 		const fetchedTweets = new Array<PreparedTweet>();
-		const nitterRSSUrl = `${this.nitterBaseUrl}/${this.twitterUserName}/rss`;
+		const nitterRSSUrl = `${nitterBaseUrl}/${this.twitterUserName}/rss`;
 
 		try {
 			const XMLdata = await axios.get(nitterRSSUrl, {
@@ -136,7 +162,7 @@ export class Nitter {
 				if(videoInDescription) {
 					const videoUrlRegex = /data-url="([^"]*)"/gm;
 
-					const nitterPost = await axios.get(`${this.nitterBaseUrl}/${this.twitterUserName}/status/${tweet.id}#m`, {
+					const nitterPost = await axios.get(`${nitterBaseUrl}/${this.twitterUserName}/status/${tweet.id}#m`, {
 						headers: {
 							'User-Agent': this.fakeUserAgent,
 							Cookie: "hlsPlayback=on;"
