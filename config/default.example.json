@@ -8,9 +8,9 @@
 	"twitterUserName": "TheRocketBeans",
 	"nitterInstances": [
 		"https://nitter.lacontrevoie.fr",
-		"https://nitter.nixnet.services/",
+		"https://nitter.nixnet.services",
 		"https://nitter.fdn.fr",
-		"nitter.kavin.rocks",
-		"nitter.unixfox.eu"
+		"https://nitter.kavin.rocks",
+		"https://nitter.unixfox.eu"
 	]
 }

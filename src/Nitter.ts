@@ -75,7 +75,7 @@ export class Nitter {
 			const jObj = this.parser.parse(XMLdata.data);
 
 			if(jObj?.rss?.channel?.item?.length < 1) {
-				Log.error(`No tweets found in RSS feed`);
+				Log.error(`No tweets found in RSS feed. ${nitterRSSUrl}`);
 				return;
 			}
 
@@ -136,7 +136,7 @@ export class Nitter {
 			}
 
 			if(!lastTweetId || lastTweetId.length < 1) {
-				Log.error('No last tweet found');
+				Log.error(`No last tweet found. ${nitterRSSUrl}`);
 				return;
 			}
 
@@ -146,10 +146,10 @@ export class Nitter {
 			const newTweets = parsedNitterTweets.slice(0, lastTweetIndex);
 
 			if(newTweets.length < 1) {
-				Log.info(`No new tweets found`);
+				Log.info(`No new tweets found. ${nitterRSSUrl}`);
 				return;
 			} else {
-				Log.info(`Found ${newTweets.length} new tweets`);
+				Log.info(`Found ${newTweets.length} new tweets. ${nitterRSSUrl}`);
 			}
 
 			for(const tweet of newTweets) {
