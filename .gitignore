@@ -3,5 +3,6 @@
 .vscode/
 .env/
 /config/default.json
+/config/default.json.bak
 /tmp
 cache.db

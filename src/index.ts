@@ -1,11 +1,10 @@
 import { Log } from './Log';
 import { Mastodon } from './Mastodon';
 import fs from 'fs';
-import { Twitter } from './Twitter';
 import path from 'path';
 import config from 'config';
-import { LinkShortener } from './LinkShortener';
 import { DBCache } from './DBCache';
+import { Nitter } from './Nitter';
 
 export const tmpFolder = path.join(__dirname, '/../', '/tmp');
 
@@ -21,21 +20,19 @@ const syncTweets = async () => {
 			fs.mkdirSync(tmpFolder);
 		}
 
-		const tweets = await Twitter.getTweets();
+		const tweets = await Nitter.getTweets();
 
-		if(tweets.length > 0) {
-			Log.info(`Start tooting ${tweets.length} toots`);
-
-			try {
-				for(const tweet of tweets) {
+		if(tweets?.length > 0) {
+			for(const tweet of tweets) {
+				try {
 					await Mastodon.createStatus(tweet);
+				} catch (error) {
+					Log.error(error.message);
 				}
-			} catch (error) {
-				Log.error(error.message);
 			}
 		}
 	} catch (error) {
-		Log.error(`Failed to sync tweets: ${error}`);
+		Log.error(`Error occured: ${error}`);
 	} finally {
 		if(fs.existsSync(tmpFolder)) {
 			fs.rmSync(tmpFolder, { recursive: true });
@@ -47,19 +44,19 @@ const syncTweets = async () => {
 		}
 		running = false;
 	}
-}
+};
 
 (async () => {
-	Log.info(`Booting Twitter to Mastodon Bot Version ${process.env.npm_package_version}`);
+	Log.info(`Booting Nitter to Mastodon Bot Version ${process.env.npm_package_version}`);
 
 	const refreshMillis = config.get("refreshMillis") as number;
 
 	Log.debug(`Setting tmpFolder to ${tmpFolder}`);
 
 	await DBCache.init();
-	await LinkShortener.init();
+	//await LinkShortener.init();
 	await Mastodon.init();
-	await Twitter.init();
+	await Nitter.init();
 
 	await syncTweets();
 	setInterval(syncTweets, refreshMillis);

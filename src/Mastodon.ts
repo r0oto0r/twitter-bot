@@ -1,14 +1,25 @@
-import type { mastodon } from 'masto';
-import { login } from 'masto';
+import { login, mastodon } from 'masto';
 import { Log } from './Log';
 import fs from 'fs';
 import config from 'config';
 import moment from 'moment-timezone';
 import { DBCache } from './DBCache';
 
+export interface PreparedTweet {
+	id: string;
+	referencedTweet: string;
+	text: string;
+	attachedMedia: Array<AttachedMedia>
+};
+
+export interface AttachedMedia {
+	filePath: string;
+	altText?: string
+};
+
 export class Mastodon {
 	private static masto: mastodon.Client;
-	private static twitterHandleRegex = /\s(@[a-zA-Z0-9_]+)/gm;
+	private static twitterHandleRegex = /(@[a-zA-Z0-9_]+)/gm;
 	private static twitterMediaLinkRegex = /https:\/\/twitter\.com\/TheRocketBeans\/status\/\d*\/(video|photo)\/\d*/gm;
 	private static twitterMastodonHandleMap: { [twitterHandle: string]: string };
 
@@ -28,7 +39,7 @@ export class Mastodon {
 	public static async groomText(text: string) {
 		text = this.replaceHandles(text);
 		text = this.unEntity(text);
-		text = this.removeTwitterMediaLinks(text);
+		text = text.replaceAll(/(#\w+)/gm, '$1' + Math.floor(10000 + Math.random() * 1000));
 		return text.substring(0, 500);
 	}
 
@@ -54,17 +65,6 @@ export class Mastodon {
 		return result;
 	}
 
-
-	private static removeTwitterMediaLinks(text: string) {
-		let result = text;
-		const twitterMediaLinks = text.matchAll(this.twitterMediaLinkRegex);
-		for(const [twitterMediaLink] of twitterMediaLinks) {
-			result = result.replace(twitterMediaLink, '');
-		}
-
-		return result;
-	}
-
 	public static async updateProfile() {
 		return this.masto.v1.accounts.updateCredentials({
 			fieldsAttributes: [
@@ -84,7 +84,7 @@ export class Mastodon {
 		});
 	}
 
-	public static async createStatus(tweet: any) {
+	public static async createStatus(tweet: PreparedTweet) {
 		const { id: tweetId, text, attachedMedia, referencedTweet } = tweet;
 
 		const existingStatusId = await DBCache.getStatusId(tweetId);
@@ -93,10 +93,24 @@ export class Mastodon {
 			return;
 		}
 
-		let uploadedMedia = new Array<mastodon.v1.MediaAttachment>();
+		const uploadedMedia = new Array<mastodon.v1.MediaAttachment>();
 		if(attachedMedia?.length > 0) {
+			const uploadPromisses = new Array<Promise<void>>();
 			for(const { filePath, altText } of attachedMedia) {
-				uploadedMedia.push(await Mastodon.createMediaAttachments(filePath, altText));
+				uploadPromisses.push(new Promise<void>(async (resolve, reject) => {
+					try {
+						uploadedMedia.push(await Mastodon.createMediaAttachments(filePath, altText));
+						resolve();
+					} catch (error) {
+						Log.error(error);
+						reject();
+					}
+				}));
+			}
+			try {
+				await Promise.all(uploadPromisses);
+			} catch (error) {
+				Log.error(error);
 			}
 		}
 
@@ -132,11 +146,9 @@ export class Mastodon {
 		return response?.id;
 	}
 
-	public static async createMediaAttachments(path: string, altText: string) {
+	public static async createMediaAttachments(path: string, altText?: string) {
 		if(fs.existsSync(path)) {
 			try {
-				Log.debug(`Creating media: path ${path}${altText ? `\n${altText}` : ''}`);
-
 				const attachment = await this.masto.v2.mediaAttachments.create({
 					file: new Blob([fs.readFileSync(path)]),
 					description: altText
@@ -146,7 +158,8 @@ export class Mastodon {
 
 				return attachment;
 			} catch (error) {
-				throw new Error(`Failed to create media ${path}: ${error}`);
+				Log.error(error.message);
+				throw `Couldn't create media attachment`;
 			}
 		} else {
 			throw new Error(`${path} not found!`);

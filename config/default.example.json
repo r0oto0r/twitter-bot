@@ -1,13 +1,9 @@
 {
 	"mastodonBaseUrl": "https://det.social/",
 	"mastodonAccessToken": "",
-	"twitterAccessToken": "",
-	"twitterAccountId": "",
 	"twitterMastodonHandleMap": {
 		"@Grziwatzki": "@amtavernentresen@rollenspiel.social"
 	},
 	"refreshMillis": 5000,
-	"tiniURLAPIKey": "",
-	"tinyURLAPI": "https://api.tinyurl.com",
-	"tinyURLDomain": "tiny.one"
+	"twitterUserName": "TheRocketBeans"
 }

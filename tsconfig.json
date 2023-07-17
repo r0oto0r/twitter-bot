@@ -7,8 +7,7 @@
 		"esModuleInterop": true,
 		"experimentalDecorators": true,
 		"lib": ["ES2021"],
-		"noImplicitAny": true,
-		"suppressImplicitAnyIndexErrors": true
+		"noImplicitAny": true
 	},
 	"exclude": [
 		"node_modules"
