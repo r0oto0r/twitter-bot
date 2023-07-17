@@ -32,11 +32,12 @@ export class Nitter {
 		Log.info(`Done setting up nitter client`);
 	}
 
-	private static async pickRandomNitterInstance(): Promise<string> {
+	private static async getRSSFromRandomNitterInstance(): Promise<{ rssData: any; nitterBaseUrl: string }> {
 		const nitterInstances = config.get('nitterInstances') as Array<string>;
 		let randomIndex = Math.floor(Math.random() * nitterInstances.length);
 		let instanceAvailable = false;
 		let instanceIndex = 0;
+		let rssData = null;
 
 		while(!instanceAvailable) {
 			const instance = nitterInstances[randomIndex];
@@ -48,6 +49,7 @@ export class Nitter {
 				});
 				if(response.status === 200) {
 					instanceAvailable = true;
+					rssData = response.data;
 				}
 			} catch (error) {
 				Log.error(`Instance ${instance} not available`);
@@ -56,26 +58,25 @@ export class Nitter {
 			}
 		}
 
-		return nitterInstances[randomIndex];
+		return { rssData, nitterBaseUrl: nitterInstances[randomIndex] };
 	}
 
 	public static async getTweets(): Promise<Array<PreparedTweet>> {
 		let lastTweetId = await DBCache.getLastTweetId();
-		const nitterBaseUrl = await this.pickRandomNitterInstance();
 		const fetchedTweets = new Array<PreparedTweet>();
-		const nitterRSSUrl = `${nitterBaseUrl}/${this.twitterUserName}/rss`;
 
 		try {
-			const XMLdata = await axios.get(nitterRSSUrl, {
-				headers: {
-					'User-Agent': this.fakeUserAgent
-				}
-			});
+			const { rssData, nitterBaseUrl } = await this.getRSSFromRandomNitterInstance();
 
-			const jObj = this.parser.parse(XMLdata.data);
+			if(!rssData) {
+				Log.error(`No RSS data found. ${nitterBaseUrl}`);
+				return;
+			}
+
+			const jObj = this.parser.parse(rssData);
 
 			if(jObj?.rss?.channel?.item?.length < 1) {
-				Log.error(`No tweets found in RSS feed. ${nitterRSSUrl}`);
+				Log.error(`No tweets found in RSS feed. ${nitterBaseUrl}`);
 				return;
 			}
 
@@ -136,7 +137,7 @@ export class Nitter {
 			}
 
 			if(!lastTweetId || lastTweetId.length < 1) {
-				Log.error(`No last tweet found. ${nitterRSSUrl}`);
+				Log.error(`No last tweet found.  ${nitterBaseUrl}`);
 				return;
 			}
 
@@ -146,10 +147,10 @@ export class Nitter {
 			const newTweets = parsedNitterTweets.slice(0, lastTweetIndex);
 
 			if(newTweets.length < 1) {
-				Log.info(`No new tweets found. ${nitterRSSUrl}`);
+				Log.info(`No new tweets found.  ${nitterBaseUrl}`);
 				return;
 			} else {
-				Log.info(`Found ${newTweets.length} new tweets. ${nitterRSSUrl}`);
+				Log.info(`Found ${newTweets.length} new tweets.  ${nitterBaseUrl}`);
 			}
 
 			for(const tweet of newTweets) {
