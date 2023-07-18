@@ -161,6 +161,7 @@ export class Nitter {
 
 				const videoInDescription = tweet.description.includes("ext_tw_video_thumb");
 				if(videoInDescription) {
+					Log.info(`Video in description`);
 					const videoUrlRegex = /data-url="([^"]*)"/gm;
 
 					const nitterPost = await axios.get(`${nitterBaseUrl}/${this.twitterUserName}/status/${tweet.id}#m`, {
@@ -169,6 +170,11 @@ export class Nitter {
 							Cookie: "hlsPlayback=on;"
 						}
 					});
+
+					if(nitterPost.status !== 200) {
+						Log.error(`Could not fetch nitter post: ${nitterBaseUrl}/${this.twitterUserName}/status/${tweet.id}#m`);
+						continue;
+					}
 
 					const match = videoUrlRegex.exec(nitterPost.data);
 					const mediaURL = match[1].split('/').pop();
