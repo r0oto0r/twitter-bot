@@ -192,28 +192,33 @@ export class Nitter {
 					Log.info(`No video in description`)
 					const partsOfDescription = tweet.description.split('</p>');
 					Log.info(`Parts of description: ${partsOfDescription.length}`);
-					if(partsOfDescription.length > 1 && partsOfDescription[1].includes('src="')) {
-						const mediaURLRegex = /src="([^"]*)"/gm;
-						const mediaURL = mediaURLRegex.exec(partsOfDescription[1])[1];
-						if(!mediaURL) {
+					if(partsOfDescription.length > 1 && partsOfDescription[1].includes('<img src="')) {
+						const mediaURLRegex = /<img src="([^"]*)"/gm;
+						const mediaURLs = mediaURLRegex.exec(partsOfDescription[1]);
+						if(mediaURLs.length < 1) {
 							// should never happen!
 							Log.error(`Could not find media url in ${partsOfDescription[1]}`);
 							continue;
 						}
-						Log.info(`Downloading img attachment: ${mediaURL}`);
-						const filePath = tmpFolder + '/' + tweet.id + '.jpg';
-						const writeStream = fs.createWriteStream(filePath);
-						const response = await axios.get(mediaURL, {
-							responseType: 'stream',
-							headers: {
-								'User-Agent': this.fakeUserAgent
+						for(const [ i, mediaURL ] of mediaURLs.entries()) {
+							if(i === 0) {
+								continue;
 							}
-						});
-						response.data.pipe(writeStream);
-						await stream.finished(writeStream);
-						attachedMedia.push({
-							filePath
-						});
+							Log.info(`Downloading img attachment: ${mediaURL}`);
+							const filePath = tmpFolder + '/' + tweet.id + '.jpg';
+							const writeStream = fs.createWriteStream(filePath);
+							const response = await axios.get(mediaURL, {
+								responseType: 'stream',
+								headers: {
+									'User-Agent': this.fakeUserAgent
+								}
+							});
+							response.data.pipe(writeStream);
+							await stream.finished(writeStream);
+							attachedMedia.push({
+								filePath
+							});
+						}
 					}
 				}
 
