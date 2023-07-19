@@ -194,16 +194,14 @@ export class Nitter {
 					Log.info(`Parts of description: ${partsOfDescription.length}`);
 					if(partsOfDescription.length > 1 && partsOfDescription[1].includes('<img src="')) {
 						const mediaURLRegex = /<img src="([^"]*)"/gm;
-						const mediaURLs = mediaURLRegex.exec(partsOfDescription[1]);
+						const mediaURLs = [...partsOfDescription[1].matchAll(mediaURLRegex)];
 						if(mediaURLs.length < 1) {
 							// should never happen!
 							Log.error(`Could not find media url in ${partsOfDescription[1]}`);
 							continue;
 						}
-						for(const [ i, mediaURL ] of mediaURLs.entries()) {
-							if(i === 0) {
-								continue;
-							}
+						for(const mediaURLMatches of mediaURLs) {
+							const mediaURL = mediaURLMatches[1];
 							Log.info(`Downloading img attachment: ${mediaURL}`);
 							const filePath = tmpFolder + '/' + tweet.id + '.jpg';
 							const writeStream = fs.createWriteStream(filePath);
