@@ -200,10 +200,10 @@ export class Nitter {
 							Log.error(`Could not find media url in ${partsOfDescription[1]}`);
 							continue;
 						}
-						for(const mediaURLMatches of mediaURLs) {
+						for(const [i, mediaURLMatches] of mediaURLs.entries()) {
 							const mediaURL = mediaURLMatches[1];
 							Log.info(`Downloading img attachment: ${mediaURL}`);
-							const filePath = tmpFolder + '/' + tweet.id + '.jpg';
+							const filePath = `${tmpFolder}/${tweet.id}_${i}.jpg`;
 							const writeStream = fs.createWriteStream(filePath);
 							const response = await axios.get(mediaURL, {
 								responseType: 'stream',
