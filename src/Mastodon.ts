@@ -132,12 +132,11 @@ export class Mastodon {
 		return response?.id;
 	}
 
-	public static async createMediaAttachments(path: string, altText?: string) {
+	public static async createMediaAttachments(path: string) {
 		if(fs.existsSync(path)) {
 			try {
 				const attachment = await this.masto.v2.mediaAttachments.create({
-					file: new Blob([fs.readFileSync(path)]),
-					description: altText
+					file: new Blob([fs.readFileSync(path)])
 				});
 
 				Log.debug(`Created attachment: ${attachment?.id}`);
