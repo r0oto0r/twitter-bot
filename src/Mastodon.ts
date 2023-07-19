@@ -95,22 +95,8 @@ export class Mastodon {
 
 		const uploadedMedia = new Array<mastodon.v1.MediaAttachment>();
 		if(attachedMedia?.length > 0) {
-			const uploadPromisses = new Array<Promise<void>>();
-			for(const { filePath, altText } of attachedMedia) {
-				uploadPromisses.push(new Promise<void>(async (resolve, reject) => {
-					try {
-						uploadedMedia.push(await Mastodon.createMediaAttachments(filePath, altText));
-						resolve();
-					} catch (error) {
-						Log.error(error);
-						reject();
-					}
-				}));
-			}
-			try {
-				await Promise.all(uploadPromisses);
-			} catch (error) {
-				Log.error(error);
+			for(const { filePath } of attachedMedia) {
+				await Mastodon.createMediaAttachments(filePath)
 			}
 		}
 
